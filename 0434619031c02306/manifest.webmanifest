@@ -1,0 +1,31 @@
+{
+ "name": "Nalanda - Rajeev",
+ "short_name": "Nalanda Rajeev",
+ "description": "Nalanda Enterprises - ledger statements, collections and targets",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0b5d3b",
+ "theme_color": "#0b5d3b",
+ "start_url": "./",
+ "scope": "./",
+ "icons": [
+  {
+   "src": "../icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "../icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "../icons/icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
