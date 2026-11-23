@@ -40,7 +40,7 @@ async function boot(pass){
     if(e&&e.name==='OperationError'){localStorage.removeItem(k);loginView('Wrong access code.');return;}
     loginView('Could not load data. Check internet and try again.');return;
   }
-  var d=S.d; S.from='20250401'; S.to=iso(d.meta.today);
+  var d=S.d; S.from='20250401'; S.to=String(d.meta.maxdate);
   if(d.meta.role==='admin')S.tab='team';
   var qs=new URLSearchParams(location.search);if(qs.get('t'))S.tab=qs.get('t');if(qs.get('p')!==null&&d.parties[+qs.get('p')])S.pid=+qs.get('p');
   render();
@@ -59,7 +59,7 @@ function shell(inner){
   APP.innerHTML='<header class="noprint"><div class="top"><div><h1>Nalanda Enterprises</h1><small>'+esc(d.meta.name)+' &middot; updated '+esc(d.meta.updated)+'</small></div><button class="rf" id="rf">Refresh</button></div><nav>'+tabs.map(function(t){return'<button data-t="'+t[0]+'" class="'+(S.tab===t[0]&&!S.pid?'on':'')+'">'+t[1]+'</button>';}).join('')+'</nav></header><main>'+inner+'</main>';
   document.getElementById('rf').onclick=function(){location.reload();};
   Array.prototype.forEach.call(document.querySelectorAll('nav button'),function(b){b.onclick=function(){S.tab=b.getAttribute('data-t');S.pid=null;window.scrollTo(0,0);render();};});
-  Array.prototype.forEach.call(document.querySelectorAll('[data-pid]'),function(r){r.onclick=function(e){if(e.target.closest('a,button'))return;S.pid=+r.getAttribute('data-pid');S.sq='';S.type='';S.from='20250401';S.to=iso(S.d.meta.today);window.scrollTo(0,0);render();};});
+  Array.prototype.forEach.call(document.querySelectorAll('[data-pid]'),function(r){r.onclick=function(e){if(e.target.closest('a,button'))return;S.pid=+r.getAttribute('data-pid');S.sq='';S.type='';S.from='20250401';S.to=String(S.d.meta.maxdate);window.scrollTo(0,0);render();};});
 }
 function render(){
   if(S.pid!=null){shell(statementView(byId(S.pid)));bindStatement();return;}
@@ -169,7 +169,7 @@ function statementView(p){
   h+='<div class="card"><h3>Ledger statement</h3><div class="row noprint"><label class="sub">From <input type="date" id="df" value="'+isoDate(S.from)+'" min="2025-04-01"></label><label class="sub">To <input type="date" id="dt" value="'+isoDate(S.to)+'"></label><select id="ty"><option value="">All entries</option>'+Object.keys(types).map(function(t){return'<option '+(S.type===t?'selected':'')+'>'+esc(t)+'</option>';}).join('')+'</select><input class="s" id="sq" placeholder="Search invoice / narration" value="'+esc(S.sq)+'"></div>'+
      '<div class="sub">Period '+dstr(S.from)+' to '+dstr(S.to)+' &middot; '+sr.rows.length+' entries</div><div class="wrap"><table><tr><th>Date</th><th>Type</th><th>No</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Balance</th></tr>'+
      '<tr><td colspan="5"><b>Opening balance</b></td><td class="r"><b>'+inr(sr.open)+'</b></td></tr>'+
-     sr.rows.map(function(r){return'<tr><td>'+dstr(r[0])+'</td><td>'+esc(r[1])+(r[6]?'<div class="sub">'+esc(r[6])+'</div>':'')+'</td><td>'+esc(r[2])+'</td><td class="r">'+(r[3]?inr(r[3]):'')+'</td><td class="r">'+(r[4]?inr(r[4]):'')+'</td><td class="r">'+inr(r[5])+'</td></tr>';}).join('')+
+     sr.rows.map(function(r){var pdx=r[0]>iso(S.d.meta.today)?' <span class="pill">post-dated</span>':'';return'<tr><td>'+dstr(r[0])+'</td><td>'+esc(r[1])+pdx+(r[6]?'<div class="sub">'+esc(r[6])+'</div>':'')+'</td><td>'+esc(r[2])+'</td><td class="r">'+(r[3]?inr(r[3]):'')+'</td><td class="r">'+(r[4]?inr(r[4]):'')+'</td><td class="r">'+inr(r[5])+'</td></tr>';}).join('')+
      '<tr><td colspan="3"><b>Total</b></td><td class="r"><b>'+inr(dr)+'</b></td><td class="r"><b>'+inr(cr)+'</b></td><td class="r"><b>'+inr(sr.rows.length?sr.rows[sr.rows.length-1][5]:sr.open)+'</b></td></tr></table></div><div class="sub">Debit = sale / charge, Credit = payment / credit note. Positive balance = dealer owes us. Updated '+esc(d.meta.updated)+'.</div></div>';
   return h;
 }
@@ -185,7 +185,7 @@ function bindStatement(){
   var p=byId(S.pid);
   document.getElementById('back').onclick=function(){S.pid=null;render();};
   document.getElementById('df').onchange=function(){S.from=iso(this.value)||'20250401';render();};
-  document.getElementById('dt').onchange=function(){S.to=iso(this.value)||iso(S.d.meta.today);render();};
+  document.getElementById('dt').onchange=function(){S.to=iso(this.value)||String(S.d.meta.maxdate);render();};
   document.getElementById('ty').onchange=function(){S.type=this.value;render();};
   var sq=document.getElementById('sq');sq.oninput=function(){S.sq=sq.value;var pos=sq.selectionStart;render();var n=document.getElementById('sq');n.focus();n.setSelectionRange(pos,pos);};
   document.getElementById('wa').onclick=function(){var ph=(p.ph||'').replace(/\D/g,'');if(ph.length===10)ph='91'+ph;window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(waText(p)),'_blank');};
